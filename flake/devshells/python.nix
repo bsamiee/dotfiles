@@ -21,7 +21,6 @@ pkgs.mkShell {
   # Only project-specific tools (assumes globals from package suites)
   packages = [
     python # Specific Python version for this project
-    # Note: docker-compose should be installed globally via devops packages
   ];
 
   # Project-specific environment variables (complementing global environment.nix)

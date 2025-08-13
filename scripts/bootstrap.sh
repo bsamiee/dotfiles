@@ -89,6 +89,7 @@ install_nix() {
     sh -s -- install --determinate --no-confirm
 
   set +u
+  # shellcheck disable=SC1091  # External Nix daemon profile - sourcing expected here
   . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh 2>/dev/null || true
   set -u
 
@@ -165,6 +166,7 @@ setup_config() {
   cd "$DOTFILES"
 
   # Source common functions
+  # shellcheck disable=SC1091  # Common functions - sourcing expected here
   source "./lib/common.sh"
 
   # --- Get Universal System Variables ---
@@ -320,6 +322,7 @@ setup_ssh_keys() {
   info "Setting up SSH keys with 1Password integration..."
 
   # Source SSH utilities
+  # shellcheck disable=SC1091  # SSH utilities - sourcing expected here
   source "$DOTFILES/lib/ssh.sh" 2>/dev/null || {
     warn "SSH utilities not available - using basic setup"
     setup_ssh_keys_fallback
@@ -380,6 +383,7 @@ generate_1password_ssh_key() {
   info "Generating SSH key in 1Password..."
 
   # Source 1Password helpers
+  # shellcheck disable=SC1091  # 1Password helpers - sourcing expected here
   source "$DOTFILES/lib/1password.sh" 2>/dev/null || {
     warn "1Password helpers not available, falling back to traditional key"
     generate_traditional_ssh_key
@@ -508,6 +512,7 @@ finalize() {
 
   # Source updated shell configuration if available
   if [[ -f "$HOME/.zshrc" ]]; then
+    # shellcheck disable=SC1091  # User's zshrc - sourcing expected here
     source "$HOME/.zshrc" 2>/dev/null || true
   fi
 

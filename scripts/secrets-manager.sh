@@ -15,7 +15,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly DOTFILES="${DOTFILES:-$(dirname "$SCRIPT_DIR")}"
 
 # Source helper libraries
-# shellcheck source=../lib/1password.sh
+# shellcheck disable=SC1091  # 1Password helpers - sourcing expected here
 source "$DOTFILES/lib/1password.sh" 2>/dev/null || {
   echo "Error: 1Password helpers not available"
   exit 1

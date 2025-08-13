@@ -29,7 +29,7 @@
           };
           shfmt = {
             enable = true;
-            indent_size = 2;
+            indent_size = 4;
           };
           mdformat = {
             enable = true;

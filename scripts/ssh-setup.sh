@@ -18,6 +18,7 @@ readonly SSH_DIR="$HOME/.ssh"
 readonly GIT_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/git"
 
 # Source common utilities
+# shellcheck disable=SC1091  # Common utilities - sourcing expected here
 source "$DOTFILES_ROOT/lib/common.sh"
 
 # --- Logging Utilities --------------------------------------------------------
@@ -39,6 +40,7 @@ check_1password_cli() {
 
 check_1password_ssh_agent() {
   # Source SSH utilities for socket path detection
+  # shellcheck disable=SC1091  # SSH utilities - sourcing expected here
   source "$DOTFILES_ROOT/lib/ssh.sh" 2>/dev/null || {
     warn "SSH utilities not available"
     return 1
@@ -300,6 +302,7 @@ setup_ssh_config() {
   info "Setting up SSH configuration for 1Password..."
 
   # Source SSH utilities for socket path detection
+  # shellcheck disable=SC1091  # SSH utilities - sourcing expected here
   source "$DOTFILES_ROOT/lib/ssh.sh" 2>/dev/null || {
     warn "SSH utilities not available"
     return 1

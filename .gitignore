@@ -42,3 +42,6 @@ secrets.nix
 # Local overrides (for testing)
 local.nix
 *.local.nix
+
+
+CLAUDE.md
