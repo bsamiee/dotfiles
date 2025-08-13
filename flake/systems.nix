@@ -42,13 +42,14 @@
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 extraSpecialArgs = {
-                  inherit inputs system userConfig;
+                  inherit inputs system;
+                  userConfig = if username != null then mkUserConfig username else userConfig;
                   myLib = import ../lib {
                     inherit inputs;
                     inherit (nixpkgs) lib;
                   };
                 };
-                users.${userConfig.username} = ../home/default.nix;
+                users.${if username != null then username else userConfig.username} = ../home/default.nix;
               };
             }
             nix-homebrew.darwinModules.nix-homebrew
@@ -56,7 +57,7 @@
               nix-homebrew = {
                 enable = true;
                 enableRosetta = system == "aarch64-darwin";
-                user = userConfig.username;
+                user = if username != null then username else userConfig.username;
                 autoMigrate = true;
               };
             }
