@@ -20,7 +20,7 @@ let
     # Code quality (consolidated - two letters)
     fmt = "cargo fmt"; # rfmt - format code
     fix = "cargo clippy --fix && cargo fmt"; # rfix - fix and format
-    
+
     # Testing & coverage (consolidated)
     test = "f() { if command -v cargo-nextest &>/dev/null; then cargo nextest run \"\$@\"; else cargo test \"\$@\"; fi; }; f"; # rtest - smart test runner
     cov = "f() { if command -v cargo-tarpaulin &>/dev/null; then cargo tarpaulin --out html \"\$@\"; else echo 'Coverage requires devshell: rdl'; fi; }; f"; # rcov - coverage report

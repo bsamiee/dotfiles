@@ -6,6 +6,7 @@
 # Path          : scripts/preview.sh
 # ---------------------------------------
 # Preview configuration changes without applying them
+
 set -euo pipefail
 
 # Source common functions
@@ -28,11 +29,11 @@ echo
 # --- Build Phase ----------------------------------------------------------
 echo "Building configuration (without switching)..."
 if command -v nix-fast-build &>/dev/null; then
-  nix-fast-build --skip-cached --no-nom ".#darwinConfigurations.${config_name}.system" || exit 1
+	nix-fast-build --skip-cached --no-nom ".#darwinConfigurations.${config_name}.system" || exit 1
 elif command -v nom &>/dev/null; then
-  nix build --log-format internal-json -v ".#darwinConfigurations.${config_name}.system" |& nom --json || exit 1
+	nix build --log-format internal-json -v ".#darwinConfigurations.${config_name}.system" |& nom --json || exit 1
 else
-  nix build ".#darwinConfigurations.${config_name}.system" --print-build-logs || exit 1
+	nix build ".#darwinConfigurations.${config_name}.system" --print-build-logs || exit 1
 fi
 
 echo
@@ -46,54 +47,54 @@ echo "────────────────────────�
 
 # Check if we have a current system to compare against
 if [[ -e /run/current-system ]]; then
-  # Use nvd if available for prettier output
-  if command -v nvd &>/dev/null; then
-    echo "Using nvd for enhanced comparison..."
-    nvd diff /run/current-system ./result || true
-  else
-    # Fallback to nix store diff-closures
-    echo "Package differences:"
-    nix store diff-closures /run/current-system ./result || true
-  fi
+	# Use nvd if available for prettier output
+	if command -v nvd &>/dev/null; then
+		echo "Using nvd for enhanced comparison..."
+		nvd diff /run/current-system ./result || true
+	else
+		# Fallback to nix store diff-closures
+		echo "Package differences:"
+		nix store diff-closures /run/current-system ./result || true
+	fi
 else
-  echo "No current system found (first installation?)"
-  echo "Packages to be installed:"
-  nix path-info --closure-size -h ./result || true
+	echo "No current system found (first installation?)"
+	echo "Packages to be installed:"
+	nix path-info --closure-size -h ./result || true
 fi
 
 echo
 
 # --- Homebrew Changes -----------------------------------------------------
 if [[ -f "${DOTFILES}/darwin/modules/homebrew.nix" ]]; then
-  echo "──────────────────────────────────────────────────────────────"
-  echo "🍺 Homebrew Configuration:"
-  echo "──────────────────────────────────────────────────────────────"
+	echo "──────────────────────────────────────────────────────────────"
+	echo "🍺 Homebrew Configuration:"
+	echo "──────────────────────────────────────────────────────────────"
 
-  # Extract configured packages from homebrew.nix
-  echo "Managed brews:"
-  grep -A 10 "brews = " "${DOTFILES}/darwin/modules/homebrew.nix" | grep '"' | sed 's/.*"\(.*\)".*/  - \1/' || echo "  None configured"
+	# Extract configured packages from homebrew.nix
+	echo "Managed brews:"
+	grep -A 10 "brews = " "${DOTFILES}/darwin/modules/homebrew.nix" | grep '"' | sed 's/.*"\(.*\)".*/  - \1/' || echo "  None configured"
 
-  echo
-  echo "Managed casks:"
-  grep -A 20 "casks = " "${DOTFILES}/darwin/modules/homebrew.nix" | grep '"' | sed 's/.*"\(.*\)".*/  - \1/' || echo "  None configured"
+	echo
+	echo "Managed casks:"
+	grep -A 20 "casks = " "${DOTFILES}/darwin/modules/homebrew.nix" | grep '"' | sed 's/.*"\(.*\)".*/  - \1/' || echo "  None configured"
 
-  # Check cleanup setting
-  cleanup=$(grep "cleanup = " "${DOTFILES}/darwin/modules/homebrew.nix" | sed 's/.*cleanup = "\(.*\)".*/\1/' || echo "none")
-  if [[ "$cleanup" == "zap" ]]; then
-    echo
-    echo "⚠️  Warning: Homebrew cleanup is set to 'zap'"
-    echo "   Unlisted packages will be REMOVED on deployment"
+	# Check cleanup setting
+	cleanup=$(grep "cleanup = " "${DOTFILES}/darwin/modules/homebrew.nix" | sed 's/.*cleanup = "\(.*\)".*/\1/' || echo "none")
+	if [[ $cleanup == "zap" ]]; then
+		echo
+		echo "⚠️  Warning: Homebrew cleanup is set to 'zap'"
+		echo "   Unlisted packages will be REMOVED on deployment"
 
-    # Show current Homebrew packages for comparison
-    if command -v brew &>/dev/null; then
-      current_brews=$(brew list 2>/dev/null | wc -l | tr -d ' ')
-      current_casks=$(brew list --cask 2>/dev/null | wc -l | tr -d ' ')
-      echo
-      echo "   Current system has: $current_brews brews, $current_casks casks"
-      echo "   Run 'brew list' to see what would be removed"
-    fi
-  fi
-  echo
+		# Show current Homebrew packages for comparison
+		if command -v brew &>/dev/null; then
+			current_brews=$(brew list 2>/dev/null | wc -l | tr -d ' ')
+			current_casks=$(brew list --cask 2>/dev/null | wc -l | tr -d ' ')
+			echo
+			echo "   Current system has: $current_brews brews, $current_casks casks"
+			echo "   Run 'brew list' to see what would be removed"
+		fi
+	fi
+	echo
 fi
 
 # --- Environment Variables ------------------------------------------------
@@ -120,17 +121,20 @@ echo "────────────────────────�
 
 # Get current generation if it exists
 if [[ -L /nix/var/nix/profiles/system ]]; then
-  current_gen=$(readlink /nix/var/nix/profiles/system | sed 's/.*system-\([0-9]*\)-link/\1/')
-  echo "Current system generation: $current_gen"
-  echo "After deployment, this will be generation: $((current_gen + 1))"
-else
-  echo "This will be the first generation"
-fi
+	current_gen=$(readlink /nix/var/nix/profiles/system | sed 's/.*system-\([0-9]*\)-link/\1/')
+	echo "Current system generation: $current_gen"
+	echo "After deployment, this will be generation: $((current_gen + 1))"
 
-echo
-echo "Rollback commands available after deployment:"
-echo "  - ndrrollback     # Instant rollback to current state"
-echo "  - ngenswitch $current_gen  # Switch to specific generation"
+	echo
+	echo "Rollback commands available after deployment:"
+	echo "  - ndrrollback     # Instant rollback to current state"
+	echo "  - ngenswitch $current_gen  # Switch to specific generation"
+else
+	echo "This will be the first generation"
+
+	echo
+	echo "No rollback commands available (first generation)"
+fi
 
 echo
 

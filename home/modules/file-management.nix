@@ -75,6 +75,7 @@
     ".config/rust-analyzer/rust-analyzer.json".source = ../configs/languages/rust-analyzer.json;
     ".rustfmt.toml".source = ../configs/languages/rustfmt.toml;
     ".config/clippy/clippy.toml".source = ../configs/languages/clippy.toml;
+    ".config/clippy/clippy-lints.toml".source = ../configs/languages/clippy-lints.toml;
     ".cargo-deny.toml".source = ../configs/languages/cargo-deny.toml;
     # Lua formatting
     ".stylua.toml".source = ../configs/languages/.stylua.toml;

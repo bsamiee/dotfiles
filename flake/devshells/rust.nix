@@ -42,7 +42,7 @@ pkgs.mkShell {
 
     # Test configuration
     NEXTEST_PROFILE = "ci"; # Use CI profile for thorough testing
-    
+
     # Note: The following are inherited from global config:
     # - RUSTC_WRAPPER (sccache)
     # - CARGO_TERM_COLOR (always)
@@ -64,7 +64,7 @@ pkgs.mkShell {
     # Smart project detection and setup
     if [ -f "Cargo.toml" ]; then
       echo "🦀 Rust project detected: Cargo.toml found"
-      
+
       # Check for workspace vs single crate
       if grep -q "^\[workspace\]" Cargo.toml; then
         echo "📦 Workspace detected with multiple crates"
@@ -84,15 +84,15 @@ pkgs.mkShell {
       NEEDS_WASM=""
       NEEDS_ASYNC=""
       NEEDS_CLI=""
-      
+
       if grep -q -E "(wasm-bindgen|web-sys|js-sys)" Cargo.toml; then
         NEEDS_WASM="true"
       fi
-      
+
       if grep -q -E "(tokio|async-std|futures)" Cargo.toml; then
         NEEDS_ASYNC="true"
       fi
-      
+
       if grep -q -E "(clap|structopt|argh)" Cargo.toml; then
         NEEDS_CLI="true"
       fi
@@ -122,7 +122,7 @@ pkgs.mkShell {
       echo "   cargo nextest run - Fast test execution"
       echo "   cargo tarpaulin   - Code coverage analysis"
       echo "   bacon             - Background compilation"
-      
+
       if [ -n "$NEEDS_WASM" ]; then
         echo "   wasm-pack build   - Build WebAssembly package"
       fi
@@ -130,7 +130,7 @@ pkgs.mkShell {
     elif [ -f "Cargo.lock" ]; then
       echo "🦀 Rust project detected (Cargo.lock found, missing Cargo.toml)"
       echo "💡 This might be a git submodule or incomplete project"
-      
+
     else
       echo "📁 General Rust development environment"
       echo "💡 Create a new project with: cargo new project-name"

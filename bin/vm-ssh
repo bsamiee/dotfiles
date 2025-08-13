@@ -1,0 +1,141 @@
+#!/usr/bin/env bash
+# Title         : vm-ssh
+# Author        : Bardia Samiee
+# Project       : Dotfiles
+# License       : MIT
+# Path          : bin/vm-ssh
+# ---------------------------------------
+# Quick SSH connection to Parallels VM with auto-detection
+
+set -euo pipefail
+
+# Configuration
+readonly VM_NAME="${1:-${VM_NAME:-macOS}}"
+readonly IP_CACHE="/tmp/.vm-ips"
+# VM_USER will be determined dynamically
+
+# Color output
+info() { echo -e "\033[0;34m[INFO]\033[0m $1"; }
+error() {
+	echo -e "\033[0;31m[ERROR]\033[0m $1" >&2
+	exit 1
+}
+
+# Get VM IP with caching
+get_vm_ip() {
+	local vm_name="$1"
+
+	# Try to get current IP from prlctl
+	local ip
+	ip=$(prlctl list -f --json 2>/dev/null |
+		jq -r ".[] | select(.name == \"$vm_name\") | .ip_configured" 2>/dev/null)
+
+	if [[ -n $ip && $ip != "null" && $ip != "-" ]]; then
+		echo "$ip"
+		return 0
+	fi
+
+	# Check cache for recent IP
+	if [[ -f $IP_CACHE ]]; then
+		local cached_ip
+		cached_ip=$(grep "^$vm_name:" "$IP_CACHE" 2>/dev/null | tail -1 | cut -d: -f2)
+		if [[ -n $cached_ip ]]; then
+			info "Using cached IP: $cached_ip"
+			echo "$cached_ip"
+			return 0
+		fi
+	fi
+
+	error "Could not determine IP for VM '$vm_name'. Is it running?"
+}
+
+# Get VM user dynamically
+get_vm_user() {
+	local vm_name="$1"
+
+	# If VM_USER is set via environment, use it
+	if [[ -n ${VM_USER:-} ]]; then
+		echo "$VM_USER"
+		return 0
+	fi
+
+	# Get first non-system user from VM
+	local users
+	users=$(prlctl exec "$vm_name" "ls /Users" 2>/dev/null | grep -v "^\." | grep -v "^Shared$" | head -1)
+
+	if [[ -z $users ]]; then
+		error "No valid user found in VM '$vm_name'"
+	fi
+
+	echo "$users"
+}
+
+# Get 1Password SSH socket if available
+get_ssh_socket() {
+	local socket_path="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+	if [[ -S $socket_path ]]; then
+		echo "$socket_path"
+	elif [[ -n ${SSH_AUTH_SOCK:-} && -S $SSH_AUTH_SOCK ]]; then
+		echo "$SSH_AUTH_SOCK"
+	fi
+}
+
+# Main connection logic
+main() {
+	# Get VM user dynamically
+	local vm_user
+	vm_user=$(get_vm_user "$VM_NAME")
+
+	# Safety check: ensure VM user is not the host user
+	if [[ $vm_user == "$(whoami)" ]]; then
+		error "VM user '$vm_user' cannot be the same as host user! This would compromise isolation."
+	fi
+
+	# Get VM IP
+	local vm_ip
+	vm_ip=$(get_vm_ip "$VM_NAME")
+
+	info "Connecting to $VM_NAME ($vm_ip) as $vm_user..."
+
+	# SSH options for VM connection (using array to avoid word splitting)
+	local -a ssh_opts=(
+		-o StrictHostKeyChecking=no
+		-o UserKnownHostsFile=/dev/null
+		-o LogLevel=ERROR
+		-o ConnectTimeout=10
+	)
+
+	# Use 1Password socket if available
+	local socket
+	socket=$(get_ssh_socket)
+
+	if [[ -n $socket ]]; then
+		# shellcheck disable=SC2029  # Variables are meant to expand on client side
+		SSH_AUTH_SOCK="$socket" ssh "${ssh_opts[@]}" "$vm_user@$vm_ip" "${@:2}"
+	else
+		# shellcheck disable=SC2029  # Variables are meant to expand on client side
+		ssh "${ssh_opts[@]}" "$vm_user@$vm_ip" "${@:2}"
+	fi
+}
+
+# Show usage if --help
+if [[ ${1:-} == "--help" || ${1:-} == "-h" ]]; then
+	cat <<EOF
+Quick SSH connection to Parallels VM
+
+USAGE:
+    vm-ssh [VM_NAME] [SSH_OPTIONS]
+
+EXAMPLES:
+    vm-ssh                    # Connect to default VM (macOS)
+    vm-ssh macOS              # Connect to specific VM
+    vm-ssh macOS ls -la       # Run command in VM
+    
+ENVIRONMENT:
+    VM_NAME    Default VM name (default: macOS)
+    VM_USER    VM user to connect as (default: auto-detect)
+EOF
+	exit 0
+fi
+
+main "$@"

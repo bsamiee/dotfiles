@@ -44,9 +44,9 @@ let
       text = builtins.readFile ../../scripts/cachix.sh;
     };
 
-    deploy = mkScript {
-      name = "deploy";
-      description = "Nix deployment script";
+    deploy-darwin = mkScript {
+      name = "deploy-darwin";
+      description = "Darwin deployment script";
       deps = [ ]; # All deps globally available: deploy-rs, nixVersions.latest (nix-tools), openssh, rsync (core)
       text = builtins.readFile ../../scripts/deploy.sh;
     };

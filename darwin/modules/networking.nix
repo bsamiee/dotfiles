@@ -5,6 +5,7 @@
 # Path          : darwin/modules/networking.nix
 # ---------------------------------------
 # Network and firewall configuration
+
 { myLib, ... }:
 
 {
@@ -16,4 +17,7 @@
     enableStealthMode = myLib.default true; # Drop ICMP (stealth mode)
     blockAllIncoming = myLib.default false; # Don't block all (too restrictive)
   };
+
+  # --- SSH Service -----------------------------------------------------------
+  services.openssh.enable = true; # Enable SSH for remote access and deployments
 }

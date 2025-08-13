@@ -10,26 +10,31 @@
 
 let
   # --- Cross-Language Development Tools (dynamically prefixed) ------------------
-  prettierCommands = { # Prettier format, lint, reporting - consolidated
+  prettierCommands = {
+    # Prettier format, lint, reporting - consolidated
     fmt = "f() { prettier --write \"\${@:-.}\"; }; f"; # fmt - format files (consolidated)
     lint = "f() { prettier --check \"\${@:-.}\"; }; f"; # lint - check formatting (unified semantic)
     report = "f() { prettier --list-different \"\${@:-.}\"; }; f"; # preport - comprehensive report
   };
-  eslintCommands = {  # eslint format, lint, reporting - consolidated
+  eslintCommands = {
+    # eslint format, lint, reporting - consolidated
     lint = "f() { eslint \"\${@:-.}\"; }; f"; # elint - check for issues (unified semantic)
     lintf = "f() { eslint --fix \"\${@:-.}\"; }; f"; # elintf - auto-fix issues (unified semantic)
     report = "f() { eslint -f json \"\${@:-.}\"; }; f"; # ereport - comprehensive JSON report
   };
-  typescriptCommands = {  # TypeScript format, lint, reporting - consolidated
+  typescriptCommands = {
+    # TypeScript format, lint, reporting - consolidated
     sc = "tsc"; # tsc - compile (shorter alias) #CONFIRM THIS - IT SEEMS WRONG WITH THE DYNAMIC GENERATOR WOULD BE TSSC?
     check = "tsc --noEmit"; # tscheck - check without output
     watch = "tsc --watch"; # tswatch - watch mode
   };
-  tomlCommands = {  # TOML format, lint, reporting - consolidated
+  tomlCommands = {
+    # TOML format, lint, reporting - consolidated
     fmt = "f() { taplo fmt \"\${@:-.}\"; }; f"; # tomlfmt - format TOML files
     lint = "f() { taplo lint \"\${@:-.}\"; }; f"; # tomllint - lint TOML files
   };
-  yamlCommands = {  # YAML format, lint, reporting - consolidated
+  yamlCommands = {
+    # YAML format, lint, reporting - consolidated
     fmt = "f() { yamlfmt \"\${@:-.}\"; }; f"; # yfmt - format YAML files
     lint = "f() { yamllint \"\${@:-.}\"; }; f"; # ylint - lint YAML files
   };

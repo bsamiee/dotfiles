@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 # Title         : shell-analysis.sh
 # Author        : Bardia Samiee
 # Project       : Dotfiles
@@ -12,7 +11,7 @@ set -euo pipefail
 
 # Display usage information
 show_usage() {
-  cat <<'EOF'
+    cat <<'EOF'
 shell-analysis - Shell History Analysis and Utilities
 
 USAGE:
@@ -36,33 +35,33 @@ EOF
 
 # Command frequency analysis
 analyze_history() {
-  local count="${1:-20}"
+    local count="${1:-20}"
 
-  # Validate count parameter
-  if ! [[ $count =~ ^[0-9]+$ ]] || [[ $count -lt 1 ]]; then
-    echo "Error: Count must be a positive integer" >&2
-    return 1
-  fi
-
-  # Check if history command is available
-  if ! command -v history >/dev/null 2>&1; then
-    echo "Error: history command not available" >&2
-    return 1
-  fi
-
-  # Check if required tools are available
-  for tool in awk rg column sort nl head; do
-    if ! command -v "$tool" >/dev/null 2>&1; then
-      echo "Error: Required tool '$tool' not found" >&2
-      return 1
+    # Validate count parameter
+    if ! [[ $count =~ ^[0-9]+$ ]] || [[ $count -lt 1 ]]; then
+        echo "Error: Count must be a positive integer" >&2
+        return 1
     fi
-  done
 
-  echo "Top $count commands by frequency:"
-  echo "================================="
+    # Check if history command is available
+    if ! command -v history >/dev/null 2>&1; then
+        echo "Error: history command not available" >&2
+        return 1
+    fi
 
-  # Enhanced version of the original hist function with better error handling
-  history | awk '
+    # Check if required tools are available
+    for tool in awk rg column sort nl head; do
+        if ! command -v "$tool" >/dev/null 2>&1; then
+            echo "Error: Required tool '$tool' not found" >&2
+            return 1
+        fi
+    done
+
+    echo "Top $count commands by frequency:"
+    echo "================================="
+
+    # Enhanced version of the original hist function with better error handling
+    history | awk '
     {
         # Skip empty lines and lines starting with numbers only
         if (NF >= 2) {
@@ -85,29 +84,29 @@ analyze_history() {
             print "No commands found in history"
         }
     }' |
-    rg -v '^\.' |
-    column -t |
-    sort -nr |
-    nl -w3 -s'. ' |
-    head -n "$count"
+        rg -v '^\.' |
+        column -t |
+        sort -nr |
+        nl -w3 -s'. ' |
+        head -n "$count"
 }
 
 # URL encode from stdin
 url_encode() {
-  # Check if Python is available
-  if ! command -v python3 >/dev/null 2>&1; then
-    echo "Error: python3 not found" >&2
-    return 1
-  fi
+    # Check if Python is available
+    if ! command -v python3 >/dev/null 2>&1; then
+        echo "Error: python3 not found" >&2
+        return 1
+    fi
 
-  # Read from stdin with timeout to prevent hanging
-  if [[ -t 0 ]]; then
-    echo "Error: No input provided. Please pipe text to this command." >&2
-    echo "Example: echo 'hello world' | shell-analysis urlencode" >&2
-    return 1
-  fi
+    # Read from stdin with timeout to prevent hanging
+    if [[ -t 0 ]]; then
+        echo "Error: No input provided. Please pipe text to this command." >&2
+        echo "Example: echo 'hello world' | shell-analysis urlencode" >&2
+        return 1
+    fi
 
-  python3 -c "
+    python3 -c "
 import sys
 import urllib.parse
 
@@ -130,20 +129,20 @@ except Exception as e:
 
 # URL decode from stdin
 url_decode() {
-  # Check if Python is available
-  if ! command -v python3 >/dev/null 2>&1; then
-    echo "Error: python3 not found" >&2
-    return 1
-  fi
+    # Check if Python is available
+    if ! command -v python3 >/dev/null 2>&1; then
+        echo "Error: python3 not found" >&2
+        return 1
+    fi
 
-  # Read from stdin with timeout to prevent hanging
-  if [[ -t 0 ]]; then
-    echo "Error: No input provided. Please pipe text to this command." >&2
-    echo "Example: echo 'hello%20world' | shell-analysis urldecode" >&2
-    return 1
-  fi
+    # Read from stdin with timeout to prevent hanging
+    if [[ -t 0 ]]; then
+        echo "Error: No input provided. Please pipe text to this command." >&2
+        echo "Example: echo 'hello%20world' | shell-analysis urldecode" >&2
+        return 1
+    fi
 
-  python3 -c "
+    python3 -c "
 import sys
 import urllib.parse
 
@@ -166,32 +165,32 @@ except Exception as e:
 
 # Main function
 main() {
-  case "${1:-}" in
+    case "${1:-}" in
     -h | --help)
-      show_usage
-      exit 0
-      ;;
+        show_usage
+        exit 0
+        ;;
     hist | history)
-      shift
-      analyze_history "$@"
-      ;;
+        shift
+        analyze_history "$@"
+        ;;
     urlencode | encode)
-      url_encode
-      ;;
+        url_encode
+        ;;
     urldecode | decode)
-      url_decode
-      ;;
+        url_decode
+        ;;
     "")
-      echo "Error: No command specified" >&2
-      show_usage >&2
-      exit 1
-      ;;
+        echo "Error: No command specified" >&2
+        show_usage >&2
+        exit 1
+        ;;
     *)
-      echo "Error: Unknown command '$1'" >&2
-      show_usage >&2
-      exit 1
-      ;;
-  esac
+        echo "Error: Unknown command '$1'" >&2
+        show_usage >&2
+        exit 1
+        ;;
+    esac
 }
 
 # Run main function with all arguments

@@ -34,7 +34,6 @@
         "nix-command"
         "flakes"
         "auto-allocate-uids"
-        "repl-flake"
       ];
       # --- Performance Tuning (cache settings moved to cache.nix) --------------
       cores = 0; # Use all available cores
@@ -55,7 +54,6 @@
       max-free = myLib.default (16 * 1024 * 1024 * 1024); # 16GB maximum to free
       # macOS optimizations
       sandbox = "relaxed";
-      filter-syscalls = false; # Avoid macOS sandbox issues
       use-sqlite-wal = true;
       use-xdg-base-directories = true; # Modern pattern
       # Security (principle of least privilege)

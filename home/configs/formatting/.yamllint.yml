@@ -5,9 +5,7 @@
 # Path          : home/configs/formatting/.yamllint.yml
 # ---------------------------------------
 # YAML linting configuration
-
 extends: relaxed
-
 rules:
   line-length:
     max: 120
@@ -52,7 +50,6 @@ rules:
   trailing-spaces: enable
   new-lines:
     type: unix
-
 ignore: |-
   .git/
   node_modules/

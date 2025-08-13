@@ -12,27 +12,90 @@
     # --- Spotlight & Search ----------------------------------------------------
     "com.apple.spotlight" = {
       orderedItems = myLib.default [
-        { enabled = true; name = "APPLICATIONS"; }
-        { enabled = true; name = "SYSTEM_PREFS"; }
-        { enabled = true; name = "DIRECTORIES"; }
-        { enabled = true; name = "PDF"; }
-        { enabled = true; name = "DOCUMENTS"; }
-        { enabled = false; name = "MESSAGES"; }
-        { enabled = false; name = "CONTACT"; }
-        { enabled = false; name = "EVENT_TODO"; }
-        { enabled = false; name = "IMAGES"; }
-        { enabled = false; name = "BOOKMARKS"; }
-        { enabled = false; name = "MUSIC"; }
-        { enabled = false; name = "MOVIES"; }
-        { enabled = false; name = "PRESENTATIONS"; }
-        { enabled = false; name = "SPREADSHEETS"; }
-        { enabled = false; name = "SOURCE"; }
-        { enabled = false; name = "MENU_DEFINITION"; }
-        { enabled = false; name = "MENU_OTHER"; }
-        { enabled = false; name = "MENU_CONVERSION"; }
-        { enabled = false; name = "MENU_EXPRESSION"; }
-        { enabled = false; name = "MENU_WEBSEARCH"; }
-        { enabled = false; name = "MENU_SPOTLIGHT_SUGGESTIONS"; }
+        {
+          enabled = true;
+          name = "APPLICATIONS";
+        }
+        {
+          enabled = true;
+          name = "SYSTEM_PREFS";
+        }
+        {
+          enabled = true;
+          name = "DIRECTORIES";
+        }
+        {
+          enabled = true;
+          name = "PDF";
+        }
+        {
+          enabled = true;
+          name = "DOCUMENTS";
+        }
+        {
+          enabled = false;
+          name = "MESSAGES";
+        }
+        {
+          enabled = false;
+          name = "CONTACT";
+        }
+        {
+          enabled = false;
+          name = "EVENT_TODO";
+        }
+        {
+          enabled = false;
+          name = "IMAGES";
+        }
+        {
+          enabled = false;
+          name = "BOOKMARKS";
+        }
+        {
+          enabled = false;
+          name = "MUSIC";
+        }
+        {
+          enabled = false;
+          name = "MOVIES";
+        }
+        {
+          enabled = false;
+          name = "PRESENTATIONS";
+        }
+        {
+          enabled = false;
+          name = "SPREADSHEETS";
+        }
+        {
+          enabled = false;
+          name = "SOURCE";
+        }
+        {
+          enabled = false;
+          name = "MENU_DEFINITION";
+        }
+        {
+          enabled = false;
+          name = "MENU_OTHER";
+        }
+        {
+          enabled = false;
+          name = "MENU_CONVERSION";
+        }
+        {
+          enabled = false;
+          name = "MENU_EXPRESSION";
+        }
+        {
+          enabled = false;
+          name = "MENU_WEBSEARCH";
+        }
+        {
+          enabled = false;
+          name = "MENU_SPOTLIGHT_SUGGESTIONS";
+        }
       ];
     };
 

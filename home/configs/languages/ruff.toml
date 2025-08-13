@@ -40,25 +40,41 @@ line-ending = "lf"
 # --- Linting Rules ------------------------------------------------------------
 [lint]
 select = [
-  "E", "F", "W",           # pycodestyle, pyflakes
-  "B", "C4", "SIM", "PIE", "PERF", "RUF",  # Code quality
-  "A", "ARG", "PTH", "FLY", "UP",          # Best practices
-  "ANN", "TCH",            # Type checking
-  "ASYNC",                 # Async
-  "S",                     # Security
-  "I", "N", "TID",         # Code organization
-  "D",                     # Documentation
-  "EM", "TRY", "RET",      # Error handling
-  "PT",                    # Testing
+  "E",
+  "F",
+  "W",     # pycodestyle, pyflakes
+  "B",
+  "C4",
+  "SIM",
+  "PIE",
+  "PERF",
+  "RUF",   # Code quality
+  "A",
+  "ARG",
+  "PTH",
+  "FLY",
+  "UP",    # Best practices
+  "ANN",
+  "TCH",   # Type checking
+  "ASYNC", # Async
+  "S",     # Security
+  "I",
+  "N",
+  "TID",   # Code organization
+  "D",     # Documentation
+  "EM",
+  "TRY",
+  "RET",   # Error handling
+  "PT",    # Testing
 ]
 
 ignore = [
-  "E501",   # Line too long (formatter handles)
-  "D203",   # One blank line before class docstring
-  "D212",   # Multi-line docstring start
-  "ANN101", # Missing type annotation for self
-  "ANN102", # Missing type annotation for cls
-  "S101",   # Use of assert
+  "E501",    # Line too long (formatter handles)
+  "D203",    # One blank line before class docstring
+  "D212",    # Multi-line docstring start
+  "ANN101",  # Missing type annotation for self
+  "ANN102",  # Missing type annotation for cls
+  "S101",    # Use of assert
   "PLR2004", # Magic values in comparisons
   "ERA001",  # Commented-out code
 ]

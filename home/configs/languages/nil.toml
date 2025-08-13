@@ -12,10 +12,7 @@ command = ["nixfmt"]
 
 # --- Diagnostics Configuration ---------------------------------------------
 [diagnostics]
-excludedFiles = [
-  "flake.lock",
-  "*.patch",
-]
+excludedFiles = ["flake.lock", "*.patch"]
 
 # --- Nix Configuration -----------------------------------------------------
 [nix]

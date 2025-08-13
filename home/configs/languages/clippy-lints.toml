@@ -1,10 +1,10 @@
-# Title         : cargo-lints-template.toml
+# Title         : clippy-lints.toml
 # Author        : Bardia Samiee
 # Project       : Dotfiles
 # License       : MIT
-# Path          : home/configs/languages/cargo-lints-template.toml
+# Path          : home/configs/languages/clippy-lints.toml
 # ---------------------------------------
-# Template for Cargo.toml lints configuration
+# Global Clippy lints configuration for all Rust projects
 
 # --- Workspace Configuration -----------------------------------------------
 # For workspace: [workspace.lints.clippy] in workspace Cargo.toml

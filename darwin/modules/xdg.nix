@@ -188,6 +188,10 @@ let
       mode = "755";
     }
     {
+      path = "${xdgDirs.configHome}/clippy";
+      mode = "755";
+    }
+    {
       path = "${xdgDirs.cacheHome}/cargo";
       mode = "755";
     }

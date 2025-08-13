@@ -11,8 +11,7 @@
 with pkgs;
 [
   # --- Lua Runtime & Package Management -----------------------------------------
-  lua # Lua interpreter (latest stable)
-  luajit # Just-In-Time Lua compiler
+  luajit # Just-In-Time Lua compiler (provides 'lua' command)
   luarocks # Lua package manager
 
   # --- Language Server & Intelligence -------------------------------------------

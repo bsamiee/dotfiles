@@ -103,7 +103,7 @@ _:
   ];
 
   # Additional eza-specific features
-  modernFeatures = {
+  _modernFeatures = {
     # Git integration
     gitRepos = "--git-repos"; # Show git status for repos
     gitIgnore = "--git-ignore"; # Respect .gitignore

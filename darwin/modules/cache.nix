@@ -65,7 +65,6 @@ in
       eval-cache = true;
       tarball-ttl = 300;
       builders-use-substitutes = true;
-      substitute-on-destination = false;
       post-build-hook = cachixHook;
       http-connections = 50;
       connect-timeout = 5;

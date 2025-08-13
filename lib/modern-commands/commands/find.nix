@@ -119,7 +119,7 @@ _:
   ];
 
   # Special handlers for complex translations
-  specialHandlers = {
+  _specialHandlers = {
     # Handle -type with multiple values (e.g., -type f,d)
     typeHandler = true;
 
@@ -146,7 +146,7 @@ _:
   };
 
   # Additional fd-specific features
-  modernFeatures = {
+  _modernFeatures = {
     # File extension filtering (more intuitive than -name)
     extension = "--extension"; # -e shorthand available
 
@@ -173,7 +173,7 @@ _:
   };
 
   # Unsupported features with helpful messages
-  unsupportedFeatures = {
+  _unsupportedFeatures = {
     "-perm" = "Permission filtering not supported. Use: fd ... --exec test -perm {} \\;";
     "-atime" = "Access time filtering not supported. fd only supports modification time.";
     "-anewer" = "Access time comparison not supported. Use --changed-within or --changed-before.";

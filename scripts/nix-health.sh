@@ -17,9 +17,9 @@ NC='\033[0m'
 # --- System Health Checks ---
 printf "%-25s" "Nix daemon:"
 if launchctl list | grep -q org.nixos.nix-daemon; then
-  echo -e "${GREEN}OK${NC}"
+	echo -e "${GREEN}OK${NC}"
 else
-  echo -e "${RED}FAIL${NC}"
+	echo -e "${RED}FAIL${NC}"
 fi
 
 # --- Store Metrics ---
@@ -41,9 +41,9 @@ nix-store --gc --print-roots 2>/dev/null | wc -l | tr -d ' ' || echo "0"
 
 printf "%-25s" "Last GC:"
 if [ -f /nix/var/nix/gcroots/auto ]; then
-  stat -f "%Sm" -t "%Y-%m-%d %H:%M" /nix/var/nix/gcroots/auto 2>/dev/null || echo "Never"
+	stat -f "%Sm" -t "%Y-%m-%d %H:%M" /nix/var/nix/gcroots/auto 2>/dev/null || echo "Never"
 else
-  echo "Never"
+	echo "Never"
 fi
 
 # --- Generations ---
@@ -58,16 +58,16 @@ darwin-rebuild --list-generations 2>/dev/null | head -1 | awk '{print $3}' || ec
 echo -e "\n${YELLOW}Cache Status:${NC}"
 printf "%-25s" "Cachix configured:"
 if cachix authtoken &>/dev/null 2>&1; then
-  echo -e "${GREEN}Yes${NC}"
+	echo -e "${GREEN}Yes${NC}"
 else
-  echo -e "${YELLOW}No${NC}"
+	echo -e "${YELLOW}No${NC}"
 fi
 
 printf "%-25s" "Cachix daemon:"
 if pgrep -x "cachix" >/dev/null; then
-  echo -e "${GREEN}Running${NC}"
+	echo -e "${GREEN}Running${NC}"
 else
-  echo -e "${YELLOW}Not running${NC}"
+	echo -e "${YELLOW}Not running${NC}"
 fi
 
 printf "%-25s" "Substituters:"
@@ -77,9 +77,9 @@ nix show-config 2>/dev/null | grep -c "^substituters" || echo "0"
 echo -e "\n${YELLOW}Build Performance:${NC}"
 printf "%-25s" "Eval cache enabled:"
 if nix show-config 2>/dev/null | grep -q "eval-cache = true"; then
-  echo -e "${GREEN}Yes${NC}"
+	echo -e "${GREEN}Yes${NC}"
 else
-  echo -e "${RED}No${NC}"
+	echo -e "${RED}No${NC}"
 fi
 
 printf "%-25s" "Max jobs:"
@@ -93,23 +93,23 @@ find ~ -maxdepth 3 -type l -name "result*" ! -exec test -e {} \; 2>/dev/null | w
 # --- Disk Usage ---
 echo -e "\n${YELLOW}Disk Usage:${NC}"
 df -h /nix/store ~ | tail -n +2 | while read -r line; do
-  echo "  $line"
+	echo "  $line"
 done
 
 # --- Recommendations ---
 echo -e "\n${YELLOW}Recommendations:${NC}"
 DEAD_COUNT=$(nix-store --gc --print-dead 2>/dev/null | wc -l | tr -d ' ')
 if [ "$DEAD_COUNT" -gt 100 ]; then
-  echo "  • Run 'ngc' to clean ${DEAD_COUNT} dead paths"
+	echo "  • Run 'ngc' to clean ${DEAD_COUNT} dead paths"
 fi
 
 BROKEN_LINKS=$(find ~ -maxdepth 3 -type l -name "result*" ! -exec test -e {} \; 2>/dev/null | wc -l | tr -d ' ')
 if [ "$BROKEN_LINKS" -gt 0 ]; then
-  echo "  • Clean broken links: find ~ -maxdepth 3 -type l -name 'result*' ! -exec test -e {} \\; -delete"
+	echo "  • Clean broken links: find ~ -maxdepth 3 -type l -name 'result*' ! -exec test -e {} \\; -delete"
 fi
 
 if ! cachix authtoken &>/dev/null 2>&1; then
-  echo "  • Configure Cachix: run 'cachix authtoken' for faster builds"
+	echo "  • Configure Cachix: run 'cachix authtoken' for faster builds"
 fi
 
 echo -e "\n${GREEN}Health check complete!${NC}"

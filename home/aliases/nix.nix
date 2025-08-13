@@ -25,7 +25,7 @@ let
 
     # Flake operations (two letters)
     fu = "nix flake update"; # nfu
-    fc = "nix flake check"; # nfc
+    fc = "nix-fast-build --skip-cached --flake '.#checks'"; # nfc - fast parallel check
     fs = "nix flake show"; # nfs
     fl = "nix flake lock"; # nfl
     fli = "nix flake lock --update-input"; # nfli
@@ -39,7 +39,7 @@ let
 
     # Darwin operations (scripts now in PATH via modules/scripts.nix)
     rb = "rebuild"; # nrb - smart rebuild
-    rc = "rebuild -c"; # nrc - rebuild with check
+    rc = "rebuild -c"; # nrc - rebuild with fast check
     ru = "rebuild -u"; # nru - rebuild with update
     rp = "rebuild -p"; # nrp - rebuild with preview (no switch)
     rd = "rebuild -d"; # nrd - rebuild with diff
@@ -90,14 +90,14 @@ let
     report = "f() { qa-report.sh nix \"\${@:-.}\"; }; f"; # nreport - comprehensive report
 
     # Deployment & remote (semantic)
-    deploy = "deploy"; # ndeploy [server] [action] - smart deployment
+    deploy = "deploy-darwin"; # ndeploy [server] [action] - smart deployment
 
     # Generation management
     gens = "darwin-rebuild --list-generations"; # ngens - list all generations
     gendiff = "f() { source ${"DOTFILES:-$HOME/.dotfiles"}/lib/common.sh; generation_diff \"\$@\"; }; f"; # ngendiff [gen1] [gen2] - compare generations
     genswitch = "f() { darwin-rebuild switch --switch-generation \"\$1\" --flake .; }; f"; # ngenswitch <num> - switch to generation
     preview = "preview"; # npreview - preview changes (script in PATH)
-    
+
     # Garbage collection & cleanup
     gc = "nix-collect-garbage -d"; # ngc - delete old generations
     gcold = "nix-collect-garbage --delete-older-than 30d"; # ngcold - delete 30+ day old

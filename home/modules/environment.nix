@@ -100,13 +100,13 @@
 
     # Lua development (XDG-compliant)
     LUAROCKS_CONFIG = "${config.xdg.configHome}/luarocks/config.lua"; # LuaRocks configuration
-    
+
     # Shell & formatting tools (XDG-compliant)
     SHELLCHECK_OPTS = "--config-file=${config.xdg.configHome}/shellcheck/shellcheckrc";
-    
+
     # TOML formatting
     TAPLO_CONFIG = "${config.xdg.configHome}/taplo/taplo.toml"; # Override taplo config location
-    
+
     # Markdown LSP
     MARKSMAN_CONFIG = "${config.xdg.configHome}/marksman/marksman.toml";
 

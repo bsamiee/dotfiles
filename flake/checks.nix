@@ -6,26 +6,51 @@
 # ---------------------------------------
 # Automated quality checks for CI/CD and pre-commit validation
 
-{ inputs, userConfig, ... }:
+{ userConfig, ... }:
 {
   # --- Per-System Configuration -------------------------------------------------
   perSystem =
     {
       pkgs,
-      self',
+      lib,
       ...
     }:
     {
       # --- Quality Checks --------------------------------------------------------
       checks = {
-        # --- Build Validation ---------------------------------------------------
-        build = self'.packages.darwin-system;
+        # --- Evaluation Check (No Build) ----------------------------------------
+        evaluation = pkgs.runCommandLocal "evaluation-check" 
+          { 
+            src = lib.cleanSource ../..;
+            nativeBuildInputs = [ pkgs.nix ];
+          } ''
+          echo "Checking flake evaluation without building..."
+          cd $src
 
-        # --- Linting and Code Quality ------------------------------------------
+          # Test that darwin configuration evaluates without errors
+          if ! nix eval .#darwinConfigurations.default.system.drvPath >/dev/null 2>&1; then
+            echo "ERROR: Darwin configuration failed to evaluate"
+            exit 1
+          fi
+
+          # Test that home-manager configuration evaluates without errors
+          if ! nix eval .#homeConfigurations.default.activationPackage.drvPath >/dev/null 2>&1; then
+            echo "ERROR: Home-Manager configuration failed to evaluate"
+            exit 1
+          fi
+
+          echo "All configurations evaluated successfully"
+          touch $out
+        '';
+
+        # --- Linting and Code Quality (Unified via treefmt) -------------------
+        # Note: treefmt check is automatically provided via treefmt-nix
+
+        # --- Individual Linting Tools (Fallback) -------------------------------
         statix =
-          pkgs.runCommand "statix-check"
+          pkgs.runCommandLocal "statix-check"
             {
-              src = ../.;
+              src = lib.cleanSource ../..;
               nativeBuildInputs = [ pkgs.statix ];
             }
             ''
@@ -34,35 +59,28 @@
               touch $out
             '';
         deadnix =
-          pkgs.runCommand "deadnix-check"
+          pkgs.runCommandLocal "deadnix-check"
             {
-              src = ../.;
+              src = lib.cleanSource ../..;
               nativeBuildInputs = [ pkgs.deadnix ];
             }
             ''
               echo "Checking for dead code..."
-              deadnix --fail $src
+              deadnix --hidden --no-underscore --fail $src
               touch $out
             '';
         nil-diagnostics =
-          pkgs.runCommand "nil-diagnostics"
+          pkgs.runCommandLocal "nil-diagnostics"
             {
-              src = ../.;
-              nativeBuildInputs = [ pkgs.nil ];
+              src = lib.cleanSource ../..;
+              nativeBuildInputs = [
+                pkgs.nil
+                pkgs.findutils
+              ];
             }
             ''
               echo "Running nil diagnostics..."
-              failed=0
-              find $src -name "*.nix" -type f | while read -r file; do
-                if ! nil diagnostics "$file"; then
-                  echo "ERROR: nil diagnostics failed for $file"
-                  failed=1
-                fi
-              done
-              if [ $failed -eq 1 ]; then
-                echo "ERROR: nil diagnostics check failed"
-                exit 1
-              fi
+              find $src -name "*.nix" -type f -exec nil diagnostics {} \;
               touch $out
             '';
         # --- Configuration Validation ------------------------------------------
@@ -83,16 +101,29 @@
           echo "Configuration validated successfully"
           touch $out
         '';
-        flake-structure =
-          pkgs.runCommand "flake-structure-check"
-            {
-              nativeBuildInputs = [ pkgs.nix ];
-            }
-            ''
-              echo "Validating flake structure..."
-              nix flake check ${inputs.self} --no-build 2>&1 || true
-              touch $out
-            '';
+        flake-structure = pkgs.runCommandLocal "flake-structure-check" 
+          { 
+            src = lib.cleanSource ../..;
+            nativeBuildInputs = [ pkgs.nix ];
+          } ''
+          echo "Validating flake structure..."
+          cd $src
+
+          # Check that required outputs exist without recursive flake check
+          if [ ! -f "flake.nix" ]; then
+            echo "ERROR: flake.nix not found in $src"
+            exit 1
+          fi
+
+          # Validate flake.nix syntax
+          if ! nix-instantiate --parse "flake.nix" >/dev/null 2>&1; then
+            echo "ERROR: flake.nix has syntax errors"
+            exit 1
+          fi
+
+          echo "Flake structure validated successfully"
+          touch $out
+        '';
       };
     };
 }

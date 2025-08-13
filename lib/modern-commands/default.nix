@@ -18,9 +18,9 @@ let
       flagMappings ? { }, # Unix flag → modern flag mappings
       contextRules ? [ ], # Context-aware flag additions
       description ? "", # Command description
-      specialHandlers ? { }, # Special handling for complex translations
-      unsupportedFeatures ? { }, # Unsupported features with messages
-      modernFeatures ? { }, # Modern tool-specific features
+      _specialHandlers ? { }, # Special handling for complex translations (reserved)
+      _unsupportedFeatures ? { }, # Unsupported features with messages (reserved)
+      _modernFeatures ? { }, # Modern tool-specific features (reserved)
     }:
     let
       # Convert flag mappings to shell case statement

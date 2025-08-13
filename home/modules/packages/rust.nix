@@ -11,12 +11,7 @@
 with pkgs;
 [
   # --- Core Rust Toolchain ---------------------------------------------------
-  rustc # Rust compiler
-  cargo # Package manager and build system
-  rustfmt # Code formatter (part of toolchain)
-  clippy # Linter (part of toolchain)
-  rust-analyzer # Language server for IDE integration
-  rustup # Toolchain management (nightly, stable, specific versions)
+  rustup # Toolchain management (includes rustc, cargo, rustfmt, clippy, rust-analyzer)
 
   # --- Essential Development Tools -------------------------------------------
   bacon # Background compiler with live feedback TUI
