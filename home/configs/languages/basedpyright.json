@@ -1,0 +1,52 @@
+{
+    "$schema": "https://raw.githubusercontent.com/DetachHead/basedpyright/main/packages/vscode-pyright/schemas/pyrightconfig.schema.json",
+    "include": ["src", "tests", "scripts"],
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "**/.venv",
+        "**/.cache",
+        "**/build",
+        "**/dist",
+        "**/.pytest_cache",
+        "**/.mypy_cache",
+        "**/.ruff_cache",
+        "**/.tox",
+        "**/.nox"
+    ],
+    "typeCheckingMode": "standard",
+    "pythonVersion": "3.13",
+    "pythonPlatform": "Darwin",
+    "reportMissingImports": true,
+    "reportUnusedImport": true,
+    "reportUnusedClass": true,
+    "reportUnusedFunction": true,
+    "reportUnusedVariable": true,
+    "reportDuplicateImport": true,
+    "reportWildcardImportFromLibrary": true,
+    "reportPrivateUsage": true,
+    "reportUnnecessaryIsInstance": true,
+    "reportUnnecessaryCast": true,
+    "reportUnnecessaryComparison": true,
+    "reportUnnecessaryContains": true,
+    "reportAssertAlwaysTrue": true,
+    "reportSelfClsParameterName": true,
+    "reportUnusedExpression": true,
+    "reportMatchNotExhaustive": true,
+    "reportShadowedImports": true,
+    "venvPath": ".",
+    "venv": ".venv",
+    "stubPath": "typings",
+    "executionEnvironments": [
+        {
+            "root": "src",
+            "pythonVersion": "3.13",
+            "extraPaths": ["src"]
+        },
+        {
+            "root": "tests",
+            "pythonVersion": "3.13",
+            "extraPaths": ["src", "tests"]
+        }
+    ]
+}

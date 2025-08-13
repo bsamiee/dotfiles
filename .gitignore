@@ -1,0 +1,44 @@
+# Nix build outputs
+result
+result-*
+
+# Secrets - NEVER commit these!
+.secrets
+secrets.nix
+*.secret
+*.key
+*.pem
+.env
+.env.*
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor directories and files
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# Backup files
+*.backup
+*.bak
+.zshrc.backup
+
+# Temporary files
+*.tmp
+*.temp
+
+# Logs
+*.log
+
+# direnv
+.direnv/
+.envrc
+
+# Local overrides (for testing)
+local.nix
+*.local.nix

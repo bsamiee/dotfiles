@@ -1,0 +1,321 @@
+# Title         : zsh.nix
+# Author        : Bardia Samiee
+# Project       : Dotfiles
+# License       : MIT
+# Path          : home/programs/zsh.nix
+# ---------------------------------------
+# PLACEHOLDER
+
+{
+  config,
+  pkgs,
+  lib,
+  myLib,
+  ...
+}:
+
+let
+  # Import modern command replacements
+  modernCommands = import ../../lib/modern-commands { inherit lib pkgs; };
+in
+
+{
+  programs.zsh = {
+    # --- Zsh Core Settings --------------------------------------------------------
+    enable = true;
+    enableCompletion = true;
+    # Note: autosuggestions and syntax highlighting are managed as packages in packages/core.nix
+    # Aliases are imported from shells/aliases.nix and merged automatically.
+    shellAliases = { };
+
+    # --- Zsh Initialization Script (zshrc) --------------------------------------
+    initContent = lib.mkMerge [
+
+      # Pre-compinit (order 550) - Zsh plugin loading
+      (myLib.order 550 ''
+        # Export XDG Base Directory variables for scripts (if not already set)
+        export XDG_CONFIG_HOME="${config.xdg.configHome}"
+        export XDG_DATA_HOME="${config.xdg.dataHome}"
+        export XDG_CACHE_HOME="${config.xdg.cacheHome}"
+        export XDG_STATE_HOME="${config.xdg.stateHome}"
+
+        # Load zsh plugins (packages managed in packages/core.nix)
+        source ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+        source ${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+        # Load additional zsh plugins
+        if [ -d "${pkgs.zsh-completions}/share/zsh/site-functions" ]; then
+          fpath+="${pkgs.zsh-completions}/share/zsh/site-functions"
+        fi
+
+        # Load history substring search
+        source ${pkgs.zsh-history-substring-search}/share/zsh-history-substring-search/zsh-history-substring-search.zsh
+
+        # Bind keys for history substring search (after plugin is loaded)
+        bindkey '^[[A' history-substring-search-up     # Up arrow
+        bindkey '^[[B' history-substring-search-down   # Down arrow
+        bindkey '^P' history-substring-search-up       # Ctrl+P
+        bindkey '^N' history-substring-search-down     # Ctrl+N
+      '')
+
+      # Modern command replacements (order 560) - Functions override Unix commands
+      (myLib.order 560 ''
+        # Load modern command replacements
+        # These functions transparently replace Unix commands with modern alternatives
+        ${modernCommands.shellFunctions}
+      '')
+
+      # Nix inspection helpers - read only, no cleaning (order 600)
+      (myLib.order 600 ''
+        # Smart package info lookup
+        nix-info() {
+          if [[ $# -lt 1 ]]; then
+            echo "Store size: $(du -sh /nix/store 2>/dev/null | cut -f1)"
+            echo "Generations: $(nix-env --list-generations 2>/dev/null | wc -l)"
+          else
+            nix path-info --closure-size -h "nixpkgs#$1" 2>/dev/null || \
+            nix-store --query --roots "$1" 2>/dev/null || \
+            echo "Not found: $1"
+          fi
+        }
+
+        # Quick dev shell with common tools
+        dev-shell() {
+          echo "Starting dev shell with common tools..."
+          nix-shell -p git nodejs python3 xh jq ripgrep fd bat
+        }
+
+        # What's using disk space?
+        nix-biggest() {
+          echo "Analyzing store (this may take a moment)..."
+          nix-du | head -20
+        }
+
+        # Trace nix builds with detailed output
+        ntrace() {
+          nix build --print-build-logs --show-trace "$@" 2>&1 | tee build.log
+        }
+      '')
+
+      # Post-compinit (order 650)
+      (myLib.order 650 ''
+        # Modern nix-index auto-management (2025 pattern)
+        # Optimized to check only once per day for better performance
+        nix-index-auto() {
+          local db_file="$XDG_CACHE_HOME/nix-index/files"
+          local db_marker="$XDG_CACHE_HOME/nix-index/.last-update"
+          local check_marker="$XDG_CACHE_HOME/nix-index/.last-check"
+          local max_age_days=7  # Update weekly
+
+          # Only check once per day to avoid overhead
+          if [[ -f "$check_marker" ]] && [[ $(find "$check_marker" -mmin -1440 2>/dev/null) ]]; then
+            return 0  # Already checked within last 24 hours
+          fi
+
+          touch "$check_marker"
+
+          if [[ ! -f "$db_file" ]]; then
+            echo "Building nix-index database for the first time..."
+            (nix-index 2>/dev/null && touch "$db_marker") &
+          elif [[ -f "$db_marker" ]]; then
+            if [[ $(find "$db_marker" -mtime +$max_age_days 2>/dev/null) ]]; then
+              echo "Updating nix-index database (older than $max_age_days days)..."
+              (nix-index 2>/dev/null && touch "$db_marker") &
+            fi
+          fi
+        }
+
+        # Check nix-index status but don't block shell startup
+        nix-index-auto
+
+        # 1Password CLI plugin aliases (auto-generated by op plugin init)
+        [ -f "$HOME/.config/op/plugins.sh" ] && source "$HOME/.config/op/plugins.sh"
+
+        # Darwin rebuild helper - delegates to rebuild script (now in PATH)
+        darwin() {
+          rebuild "$@"
+        }
+
+        # Docker/Colima socket detection helper
+        _set_docker_host() {
+          if [ -S "$HOME/.colima/default/docker.sock" ]; then
+            export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
+          elif [ -S "$HOME/.colima/docker.sock" ]; then
+            export DOCKER_HOST="unix://$HOME/.colima/docker.sock"
+          fi
+        }
+
+        # Docker/Colima helpers with dynamic socket detection
+        docker-start() {
+          if ! pgrep -q colima; then
+            echo "Starting Colima..."
+            colima start
+          fi
+          _set_docker_host
+          echo "Docker is ready at $DOCKER_HOST"
+        }
+
+        # Set DOCKER_HOST if Colima socket exists
+        _set_docker_host
+
+        # Set SSH_AUTH_SOCK for 1Password if available (platform-aware)
+        if [[ "$(uname)" == "Darwin" ]]; then
+          # macOS 1Password socket path
+          ONEPASS_SOCKET="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+        else
+          # Linux 1Password socket path
+          ONEPASS_SOCKET="$HOME/.1password/agent.sock"
+        fi
+
+        if [ -S "$ONEPASS_SOCKET" ]; then
+          export SSH_AUTH_SOCK="$ONEPASS_SOCKET"
+          export OP_BIOMETRIC_UNLOCK_ENABLED="true"
+        fi
+        unset ONEPASS_SOCKET
+
+        # Secrets are now managed via secrets-manager and 1Password
+        # Use: secrets-manager run <command> for automatic secret injection
+        # Legacy SOPS support retained for machine-specific secrets only
+
+        # Quick Python environment setup
+        pysetup() {
+          if [ -f "pyproject.toml" ]; then
+            echo "pyproject.toml already exists"
+            return 1
+          fi
+          poetry init -n
+          poetry add --group dev ruff pytest
+          echo "Python project initialized with Poetry"
+          echo "Virtual environment will be created in .venv/"
+        }
+
+        # Rust compilation cache status (sccache)
+        ruscache() {
+          if command -v sccache &> /dev/null; then
+            echo "🦀 Rust compilation cache status:"
+            sccache --show-stats
+          else
+            echo "sccache not available"
+          fi
+        }
+
+        # Project detection and LSP auto-initialization
+        project-detect() {
+          local project_type=""
+          local lsp_status=""
+
+          # Detect project type
+          if [[ -f "package.json" ]]; then
+            project_type="Node.js/TypeScript"
+            if [[ -f "tsconfig.json" ]]; then
+              project_type="TypeScript"
+            fi
+            lsp_status="typescript-language-server available"
+          elif [[ -f "pyproject.toml" ]] || [[ -f "setup.py" ]] || [[ -f "requirements.txt" ]]; then
+            project_type="Python"
+            lsp_status="basedpyright available"
+          elif [[ -f "Cargo.toml" ]]; then
+            project_type="Rust"
+            lsp_status="rust-analyzer available"
+          elif [[ -f "go.mod" ]]; then
+            project_type="Go"
+            lsp_status="gopls (install when ready)"
+          elif [[ -n "$(find . -maxdepth 1 -name "*.lua" 2>/dev/null)" ]] || [[ -f ".luarc.json" ]]; then
+            project_type="Lua"
+            lsp_status="lua-language-server available"
+          elif [[ -f "Dockerfile" ]] || [[ -f "docker-compose.yml" ]]; then
+            project_type="Docker"
+            lsp_status="hadolint available for Dockerfiles"
+          fi
+
+          if [[ -n "$project_type" ]]; then
+            echo "🔍 Project type: $project_type"
+            echo "   LSP: $lsp_status"
+          fi
+        }
+
+        # Auto-detect on directory change
+        autoload -U add-zsh-hook
+        add-zsh-hook chpwd project-detect
+
+        # XDG compliance enforcement
+        xdg-enforce() {
+          # Note: Tool XDG configurations are now handled via proper config files
+          # WGETRC, LESSHISTFILE, and NPM XDG paths are set in home/modules/environment.nix
+          # Individual tool configs are in home/configs/ and referenced in home/default.nix
+          true  # Placeholder function - can be removed if no longer needed
+        }
+
+        # Apply XDG enforcement
+        xdg-enforce
+
+        # Configure newly added tools
+
+        # Vivid for LS_COLORS generation
+        if command -v vivid &> /dev/null; then
+          export LS_COLORS="$(vivid generate molokai 2>/dev/null || true)"
+        fi
+
+        # Delta configuration (already in git.nix, but ensure it's available)
+        if command -v delta &> /dev/null; then
+          export GIT_PAGER="delta"
+        fi
+
+        # Difftastic as external diff tool
+        if command -v difft &> /dev/null; then
+          export DFT_BACKGROUND=dark
+          export DFT_DISPLAY=inline
+        fi
+
+        # Prompt and navigation tools
+
+        # ZSH syntax highlighting styles (for paths)
+        typeset -A ZSH_HIGHLIGHT_STYLES
+        ZSH_HIGHLIGHT_STYLES[path]=none
+        ZSH_HIGHLIGHT_STYLES[path_prefix]=none
+
+        # WezTerm Shell Integration (if in WezTerm)
+        if [[ -n "$WEZTERM_PANE" ]]; then
+          function _wezterm_set_user_var() {
+            printf "\033]1337;SetUserVar=%s=%s\007" "$1" "$(echo -n "$2" | base64)"
+          }
+          function _wezterm_check_git() {
+            if git rev-parse --git-dir > /dev/null 2>&1; then
+              _wezterm_set_user_var "IS_GIT_REPO" "true"
+            else
+              _wezterm_set_user_var "IS_GIT_REPO" "false"
+            fi
+          }
+          autoload -U add-zsh-hook
+          add-zsh-hook chpwd _wezterm_check_git
+          add-zsh-hook precmd _wezterm_check_git
+          _wezterm_check_git
+        fi
+      '')
+      # Late-stage integrations (order 1000)
+      (myLib.order 1000 ''
+        # Kiro terminal integration (when using Kiro terminal)
+        [[ "$TERM_PROGRAM" == "kiro" ]] && [ -f "$(kiro --locate-shell-integration-path zsh 2>/dev/null)" ] && \
+          . "$(kiro --locate-shell-integration-path zsh)"
+      '')
+      # Very last items (order 5000)
+      (myLib.order 5000 ''
+        # Source local customizations (mutable file for manual additions)
+        # This allows tools installed outside Nix to add their configs
+        # and provides a place for temporary tweaks without rebuilding
+        [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
+      '')
+    ];
+
+    # --- Zsh History Configuration ------------------------------------------------
+    history = {
+      path = "${config.xdg.dataHome}/zsh/history";
+      size = 50000;
+      save = 50000;
+      share = true;
+      extended = true;
+      ignoreDups = true;
+      expireDuplicatesFirst = true;
+    };
+  };
+}

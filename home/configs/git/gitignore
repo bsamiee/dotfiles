@@ -1,0 +1,155 @@
+# Title         : gitignore
+# Author        : Bardia Samiee
+# Project       : Dotfiles
+# License       : MIT
+# Path          : home/configs/git/gitignore
+# ---------------------------------------
+# Global gitignore for development projects
+
+# --- Operating System Files -----------------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.fseventsd
+.TemporaryItems
+
+# Windows (cross-platform teams)
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.nfs*
+
+# --- Development Environment Files ----------------------------------------
+# Direnv
+.envrc
+.direnv/
+
+# Environment files (sensitive)
+.env
+.env.local
+.env.*.local
+.secrets
+.secrets.baseline
+
+# --- Editor/IDE Files -----------------------------------------------------
+# VSCode
+.vscode/
+*.code-workspace
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Vim/Neovim
+*.swp
+*.swo
+*~
+.netrwhist
+Session.vim
+
+# Emacs
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+
+# --- Build/Cache Directories ----------------------------------------------
+node_modules/
+target/
+dist/
+build/
+.cache/
+.next/
+.nuxt/
+.vuepress/dist/
+.serverless/
+.fusebox/
+tmp/
+
+# --- Logs -----------------------------------------------------------------
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Language-Specific Temporaries ----------------------------------------
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+.tox/
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.nox/
+.hypothesis/
+coverage.xml
+htmlcov/
+
+# Rust
+Cargo.lock
+/target/
+
+# Go
+/vendor/
+
+# Java
+*.class
+*.war
+*.jar
+
+# .NET/C#
+bin/
+obj/
+TestResults/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Nix
+result
+result-*
+.direnv/
+
+# --- Package Managers -----------------------------------------------------
+# npm
+node_modules/
+npm-debug.log*
+
+# Yarn
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# --- Architecture/CAD Temporary Files -------------------------------------
+*.3dmbak
+*.rhl
+*.rws
+*.rws.data
+
+# --- Temporary Files ------------------------------------------------------
+*.tmp
+*.temp
+*.bak
+*.backup
+*.orig
+*~

@@ -1,0 +1,26 @@
+# Title         : nil.toml
+# Author        : Bardia Samiee
+# Project       : Dotfiles
+# License       : MIT
+# Path          : home/configs/languages/nil.toml
+# ---------------------------------------
+# Nix LSP configuration
+
+# --- Formatting Configuration -----------------------------------------------
+[formatting]
+command = ["nixfmt"]
+
+# --- Diagnostics Configuration ---------------------------------------------
+[diagnostics]
+excludedFiles = [
+  "flake.lock",
+  "*.patch",
+]
+
+# --- Nix Configuration -----------------------------------------------------
+[nix]
+binary = "nix"
+
+# --- Flake Configuration ---------------------------------------------------
+[flake]
+autoEvalInputs = false

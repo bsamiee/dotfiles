@@ -1,0 +1,101 @@
+# Title         : ruff.toml
+# Author        : Bardia Samiee
+# Project       : Dotfiles
+# License       : MIT
+# Path          : home/configs/languages/ruff.toml
+# ---------------------------------------
+# Python linter and formatter configuration with Google docstrings
+
+# --- Core Settings ------------------------------------------------------------
+line-length = 120
+target-version = "py313"
+preview = true
+cache-dir = "$RUFF_CACHE_DIR"
+src = ["."]
+respect-gitignore = true
+show-fixes = true
+
+exclude = [
+  ".git",
+  ".venv",
+  ".cache",
+  "node_modules",
+  "__pycache__",
+  ".mypy_cache",
+  ".pytest_cache",
+  ".ruff_cache",
+  "dist",
+  "build",
+]
+
+# --- Formatting Options -------------------------------------------------------
+[format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+skip-magic-trailing-comma = false
+line-ending = "lf"
+
+# --- Linting Rules ------------------------------------------------------------
+[lint]
+select = [
+  "E", "F", "W",           # pycodestyle, pyflakes
+  "B", "C4", "SIM", "PIE", "PERF", "RUF",  # Code quality
+  "A", "ARG", "PTH", "FLY", "UP",          # Best practices
+  "ANN", "TCH",            # Type checking
+  "ASYNC",                 # Async
+  "S",                     # Security
+  "I", "N", "TID",         # Code organization
+  "D",                     # Documentation
+  "EM", "TRY", "RET",      # Error handling
+  "PT",                    # Testing
+]
+
+ignore = [
+  "E501",   # Line too long (formatter handles)
+  "D203",   # One blank line before class docstring
+  "D212",   # Multi-line docstring start
+  "ANN101", # Missing type annotation for self
+  "ANN102", # Missing type annotation for cls
+  "S101",   # Use of assert
+  "PLR2004", # Magic values in comparisons
+  "ERA001",  # Commented-out code
+]
+
+fixable = ["ALL"]
+unfixable = []
+
+# --- Per-file Ignores ---------------------------------------------------------
+[lint.per-file-ignores]
+"test_*.py" = ["S101", "D", "ANN", "ARG002", "PLR2004"]
+"tests/*.py" = ["S101", "D", "ANN", "ARG002", "PLR2004"]
+"__init__.py" = ["F401", "F403", "PLC0414", "I001"]
+"*/cli.py" = ["T20"]
+"*/main.py" = ["T20"]
+
+# --- Import Organization -----------------------------------------------------
+[lint.isort]
+combine-as-imports = true
+force-single-line = false
+lines-after-imports = 2
+# known-first-party set per-project
+
+# --- Docstring Style ---------------------------------------------------------
+[lint.pydocstyle]
+convention = "google"
+
+# --- Type Annotation Settings ------------------------------------------------
+[lint.flake8-annotations]
+allow-star-arg-any = true
+mypy-init-return = true
+suppress-none-returning = true
+
+# --- Pytest Style Settings ---------------------------------------------------
+[lint.flake8-pytest-style]
+fixture-parentheses = true
+mark-parentheses = true
+
+# --- Pylint Settings ---------------------------------------------------------
+[lint.pylint]
+allow-magic-value-types = ["int", "str", "bytes"]
