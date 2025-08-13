@@ -121,6 +121,49 @@ get_ssh_agent_status() {
     fi
 }
 
+# --- Sudo Helper for Remote/Non-Interactive Execution ------------------------
+
+# Smart sudo wrapper that handles both interactive and non-interactive modes
+# Usage:
+#   SUDO_PASSWORD="password" run_sudo command args...
+#   or just: run_sudo command args... (for interactive)
+run_sudo() {
+	if [[ -n ${SUDO_PASSWORD:-} ]]; then
+		# Non-interactive mode with password from environment
+		echo "$SUDO_PASSWORD" | sudo -S "$@"
+	elif [[ -t 0 ]]; then
+		# Interactive terminal - normal sudo
+		sudo "$@"
+	else
+		# Non-interactive without password - try passwordless sudo
+		sudo -n "$@" 2>/dev/null || {
+			echo "ERROR: sudo requires a password. Set SUDO_PASSWORD environment variable for non-interactive use." >&2
+			echo "Example: SUDO_PASSWORD='yourpass' $0" >&2
+			return 1
+		}
+	fi
+}
+
+# Pre-authenticate sudo for a session (useful before long operations)
+# This keeps sudo authenticated for the default timeout period
+sudo_keepalive() {
+	if [[ -n ${SUDO_PASSWORD:-} ]]; then
+		echo "$SUDO_PASSWORD" | sudo -S -v
+		# Keep sudo alive in background
+		(
+			while true; do
+				sudo -n true
+				sleep 50
+				kill -0 "$$" 2>/dev/null || exit
+			done
+		) &
+		echo "Sudo authenticated and will stay active during this session"
+	else
+		echo "Set SUDO_PASSWORD to use sudo keepalive feature"
+		return 1
+	fi
+}
+
 # --- Git Integration ----------------------------------------------------------
 
 # Configure Git to use SSH signing with 1Password

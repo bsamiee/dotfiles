@@ -14,6 +14,10 @@ readonly REPO="${DOTFILES_REPO:-https://github.com/bardiasamiee/.dotfiles.git}"
 readonly DOTFILES="${DOTFILES_PATH:-$HOME/.dotfiles}"
 readonly MIN_MACOS="12"
 
+# Source SSH utilities (includes sudo helper)
+# shellcheck source=/dev/null
+source "${DOTFILES}/lib/ssh.sh" 2>/dev/null || true
+
 # --- Logging Utilities --------------------------------------------------------
 log() { echo -e "\033[0;3${2:-4}m[$1]\033[0m ${*:3}"; }
 info() { log INFO 4 "$@"; }
@@ -107,7 +111,7 @@ configure_trusted_user() {
 	}
 
 	# Backup the original config
-	sudo cp "$nix_conf" "$nix_conf.backup.$(date +%Y%m%d-%H%M%S)" 2>/dev/null || true
+	run_sudo cp "$nix_conf" "$nix_conf.backup.$(date +%Y%m%d-%H%M%S)" 2>/dev/null || true
 
 	# Add trusted user configuration
 	if grep -q "^trusted-users" "$nix_conf" 2>/dev/null; then
@@ -115,23 +119,23 @@ configure_trusted_user() {
 		local current_trusted
 		current_trusted=$(grep "^trusted-users" "$nix_conf" | sed 's/trusted-users = //')
 		echo "$current_trusted" | grep -q "$username" ||
-			sudo sed -i '' "s/^trusted-users = .*/trusted-users = $current_trusted $username/" "$nix_conf"
+			run_sudo sed -i '' "s/^trusted-users = .*/trusted-users = $current_trusted $username/" "$nix_conf"
 	else
-		echo "trusted-users = root $username" | sudo tee -a "$nix_conf" >/dev/null
+		echo "trusted-users = root $username" | run_sudo tee -a "$nix_conf" >/dev/null
 	fi
 
 	# Also ensure experimental features are enabled for flakes
 	if ! grep -q "^experimental-features.*flakes" "$nix_conf" 2>/dev/null; then
 		if grep -q "^experimental-features" "$nix_conf" 2>/dev/null; then
-			sudo sed -i '' 's/^experimental-features = .*/experimental-features = nix-command flakes/' "$nix_conf"
+			run_sudo sed -i '' 's/^experimental-features = .*/experimental-features = nix-command flakes/' "$nix_conf"
 		else
-			echo "experimental-features = nix-command flakes" | sudo tee -a "$nix_conf" >/dev/null
+			echo "experimental-features = nix-command flakes" | run_sudo tee -a "$nix_conf" >/dev/null
 		fi
 	fi
 
 	# Restart nix-daemon to apply changes
 	info "Restarting nix-daemon to apply changes..."
-	sudo launchctl kickstart -k system/org.nixos.nix-daemon 2>/dev/null || true
+	run_sudo launchctl kickstart -k system/org.nixos.nix-daemon 2>/dev/null || true
 
 	# Give daemon a moment to restart
 	sleep 2
@@ -192,7 +196,7 @@ setup_config() {
 	fi
 
 	info "Switching to new configuration..."
-	sudo ./result/sw/bin/darwin-rebuild switch --flake ".#$config_name"
+	run_sudo ./result/sw/bin/darwin-rebuild switch --flake ".#$config_name"
 
 	ok "Configuration applied successfully"
 }
@@ -470,10 +474,10 @@ setup_touchid() {
 		return
 	}
 
-	sudo cp "$pam_file" "$pam_file.backup"
+	run_sudo cp "$pam_file" "$pam_file.backup"
 
 	# Add Touch ID support (insert after first line)
-	sudo sed -i '' '1a\
+	run_sudo sed -i '' '1a\
 auth       sufficient     pam_tid.so
 ' "$pam_file" 2>/dev/null || warn "Could not enable Touch ID for sudo"
 
