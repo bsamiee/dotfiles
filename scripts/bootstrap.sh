@@ -158,6 +158,13 @@ setup_config() {
 
 	cd "$DOTFILES"
 
+	# Source initialization if not already done
+	if [[ -z ${DOTFILES_USERNAME:-} ]]; then
+		info "Initializing environment variables..."
+		# shellcheck source=/dev/null
+		source "$DOTFILES/scripts/initialize.sh"
+	fi
+
 	# Source common functions
 	# shellcheck disable=SC1091  # Common functions - sourcing expected here
 	source "./lib/common.sh"
@@ -183,9 +190,8 @@ setup_config() {
 	info "Validating flake configuration..."
 	nix flake check --no-build 2>/dev/null || warn "Flake validation warnings - proceeding"
 
-	# Build and switch configuration with runtime user
+	# Build and switch configuration
 	info "Building configuration: $config_name for user: $username..."
-	export TARGET_USER="$username"
 	if ! nix build ".#darwinConfigurations.$config_name.system" --impure --print-build-logs --show-trace; then
 		if [[ $config_name != "default" ]]; then
 			warn "Build failed for $config_name, trying default..."

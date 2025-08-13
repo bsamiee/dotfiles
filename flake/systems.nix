@@ -5,7 +5,7 @@
 # Path          : flake/systems.nix
 # ---------------------------------------
 # Darwin and Home Manager system configurations
-{ inputs, userConfig, mkUserConfig, ... }:
+{ inputs, userConfig, ... }:
 {
   # --- Flake Configuration ------------------------------------------------------
   flake =
@@ -18,12 +18,11 @@
         ;
       # --- Universal System Configuration Helper ----------------------------
       mkDarwinSystem =
-        { system, username ? null }:
+        { system }:
         darwin.lib.darwinSystem {
           inherit system;
           specialArgs = {
-            inherit inputs system;
-            userConfig = if username != null then mkUserConfig username else userConfig;
+            inherit inputs system userConfig;
             myLib = import ../lib {
               inherit inputs;
               inherit (nixpkgs) lib;
@@ -42,14 +41,13 @@
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 extraSpecialArgs = {
-                  inherit inputs system;
-                  userConfig = if username != null then mkUserConfig username else userConfig;
+                  inherit inputs system userConfig;
                   myLib = import ../lib {
                     inherit inputs;
                     inherit (nixpkgs) lib;
                   };
                 };
-                users.${if username != null then username else userConfig.username} = ../home/default.nix;
+                users.${userConfig.username} = ../home/default.nix;
               };
             }
             nix-homebrew.darwinModules.nix-homebrew
@@ -57,7 +55,7 @@
               nix-homebrew = {
                 enable = true;
                 enableRosetta = system == "aarch64-darwin";
-                user = if username != null then username else userConfig.username;
+                user = userConfig.username;
                 autoMigrate = true;
               };
             }
@@ -83,23 +81,15 @@
     in
     {
       # --- Universal Darwin Configurations ----------------------------------
-      darwinConfigurations = 
-        let
-          # Detect runtime user if possible
-          runtimeUser = builtins.getEnv "TARGET_USER";
-          effectiveUser = if runtimeUser != "" then runtimeUser else null;
-        in {
+      darwinConfigurations = {
         default = mkDarwinSystem {
           system = "aarch64-darwin";
-          username = effectiveUser;
         };
         aarch64 = mkDarwinSystem {
           system = "aarch64-darwin";
-          username = effectiveUser;
         };
         x86_64 = mkDarwinSystem {
           system = "x86_64-darwin";
-          username = effectiveUser;
         };
       };
       # --- Universal Home Manager Configurations ----------------------------

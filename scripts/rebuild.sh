@@ -149,21 +149,15 @@ fi
 # Build phase with intelligent tool selection
 echo "Building '$config_name' configuration..."
 
-# Use --impure if TARGET_USER is set (for runtime user detection)
-BUILD_FLAGS=""
-if [[ -n ${TARGET_USER:-} ]]; then
-	echo "Building for user: $TARGET_USER"
-	BUILD_FLAGS="--impure"
-fi
-
+# Always use --impure since we're reading environment variables
 if command -v nix-fast-build &>/dev/null; then
 	echo "Using nix-fast-build for enhanced performance..."
-	nix-fast-build $BUILD_FLAGS --skip-cached --no-nom ".#darwinConfigurations.${config_name}.system" || exit 1
+	nix-fast-build --impure --skip-cached --no-nom ".#darwinConfigurations.${config_name}.system" || exit 1
 elif command -v nom &>/dev/null; then
 	echo "Using nom for enhanced output..."
-	nix build $BUILD_FLAGS --log-format internal-json -v ".#darwinConfigurations.${config_name}.system" |& nom --json || exit 1
+	nix build --impure --log-format internal-json -v ".#darwinConfigurations.${config_name}.system" |& nom --json || exit 1
 else
-	nix build $BUILD_FLAGS ".#darwinConfigurations.${config_name}.system" --print-build-logs || exit 1
+	nix build --impure ".#darwinConfigurations.${config_name}.system" --print-build-logs || exit 1
 fi
 
 # Show diff if requested (before or after switch)
