@@ -5,7 +5,7 @@
 # Path          : flake/systems.nix
 # ---------------------------------------
 # Darwin and Home Manager system configurations
-{ inputs, userConfig, ... }:
+{ inputs, userConfig, mkUserConfig, ... }:
 {
   # --- Flake Configuration ------------------------------------------------------
   flake =
@@ -18,11 +18,12 @@
         ;
       # --- Universal System Configuration Helper ----------------------------
       mkDarwinSystem =
-        { system }:
+        { system, username ? null }:
         darwin.lib.darwinSystem {
           inherit system;
           specialArgs = {
-            inherit inputs system userConfig;
+            inherit inputs system;
+            userConfig = if username != null then mkUserConfig username else userConfig;
             myLib = import ../lib {
               inherit inputs;
               inherit (nixpkgs) lib;
@@ -81,15 +82,23 @@
     in
     {
       # --- Universal Darwin Configurations ----------------------------------
-      darwinConfigurations = {
+      darwinConfigurations = 
+        let
+          # Detect runtime user if possible
+          runtimeUser = builtins.getEnv "TARGET_USER";
+          effectiveUser = if runtimeUser != "" then runtimeUser else null;
+        in {
         default = mkDarwinSystem {
           system = "aarch64-darwin";
+          username = effectiveUser;
         };
         aarch64 = mkDarwinSystem {
           system = "aarch64-darwin";
+          username = effectiveUser;
         };
         x86_64 = mkDarwinSystem {
           system = "x86_64-darwin";
+          username = effectiveUser;
         };
       };
       # --- Universal Home Manager Configurations ----------------------------

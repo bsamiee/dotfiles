@@ -33,11 +33,18 @@
     inputs@{ flake-parts, ... }:
     let
       # --- Dynamic System Detection ---------------------------------------------
-      currentUser = builtins.getEnv "USER";
-      userConfig = rec {
-        username = if currentUser != "" then currentUser else "bardiasamiee";
+      # Default user config - will be overridden at deployment time if needed
+      defaultUserConfig = rec {
+        username = "bardiasamiee";  # Default, overridden by deployment
         gitUsername = "bsamiee";
         gitEmail = "b.samiee93@gmail.com";
+        userHome = "/Users/${username}";
+        flakeRoot = "${userHome}/.dotfiles";
+      };
+      
+      # Function to create user config with custom username
+      mkUserConfig = username: defaultUserConfig // rec {
+        inherit username;
         userHome = "/Users/${username}";
         flakeRoot = "${userHome}/.dotfiles";
       };
@@ -57,7 +64,8 @@
         ./flake/checks.nix
       ];
       _module.args = {
-        inherit userConfig;
+        userConfig = defaultUserConfig;
+        inherit mkUserConfig;
       };
     };
 }

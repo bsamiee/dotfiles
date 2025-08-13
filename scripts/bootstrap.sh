@@ -183,13 +183,14 @@ setup_config() {
 	info "Validating flake configuration..."
 	nix flake check --no-build 2>/dev/null || warn "Flake validation warnings - proceeding"
 
-	# Build and switch configuration
-	info "Building configuration: $config_name..."
-	if ! nix build ".#darwinConfigurations.$config_name.system" --print-build-logs --show-trace; then
+	# Build and switch configuration with runtime user
+	info "Building configuration: $config_name for user: $username..."
+	export TARGET_USER="$username"
+	if ! nix build ".#darwinConfigurations.$config_name.system" --impure --print-build-logs --show-trace; then
 		if [[ $config_name != "default" ]]; then
 			warn "Build failed for $config_name, trying default..."
 			config_name="default"
-			nix build ".#darwinConfigurations.default.system" --print-build-logs --show-trace
+			nix build ".#darwinConfigurations.default.system" --impure --print-build-logs --show-trace
 		else
 			error "Build failed - check configuration"
 		fi

@@ -438,11 +438,11 @@ cmd_deploy_nix() {
 		-e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
 		"$DOTFILES_ROOT/" "$vm_user@$vm_ip:~/.dotfiles/"
 
-	# Run rebuild in VM
-	info "Running Nix rebuild in VM..."
+	# Run rebuild in VM with correct user
+	info "Running Nix rebuild in VM as $vm_user..."
 	# shellcheck disable=SC2029  # Variables are meant to expand on client side
 	ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-		"$vm_user@$vm_ip" "cd ~/.dotfiles && ./scripts/rebuild.sh"
+		"$vm_user@$vm_ip" "cd ~/.dotfiles && TARGET_USER='$vm_user' ./scripts/rebuild.sh"
 
 	ok "Nix deployment complete!"
 }
