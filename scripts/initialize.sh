@@ -39,8 +39,10 @@ echo "  System: $DOTFILES_SYSTEM"
 echo
 
 # Ask for Git configuration
-read -rp "Enter your Git username: " git_user
-read -rp "Enter your Git email: " git_email
+echo -n "Enter your Git username: "
+read -r git_user
+echo -n "Enter your Git email: "
+read -r git_email
 
 export DOTFILES_GIT_USERNAME="$git_user"
 export DOTFILES_GIT_EMAIL="$git_email"
