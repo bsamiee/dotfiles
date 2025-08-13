@@ -54,27 +54,10 @@ check_prereqs() {
 	ok "Prerequisites validated"
 }
 
-# --- Homebrew Installation ----------------------------------------------------
-install_homebrew() {
-	command -v brew &>/dev/null && {
-		ok "Homebrew already installed: $(brew --version | head -1)"
-		return
-	}
-
-	info "Installing Homebrew..."
-	NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-	# Set up PATH based on architecture
-	local brew_path
-	if [[ $(uname -m) == "arm64" ]]; then
-		brew_path="/opt/homebrew"
-	else
-		brew_path="/usr/local"
-	fi
-	eval "$("${brew_path}"/bin/brew shellenv)"
-
-	ok "Homebrew installation complete"
-}
+# --- Homebrew Note ------------------------------------------------------------
+# Homebrew is now installed and managed by nix-homebrew during darwin-rebuild
+# The nix-homebrew module handles installation, Rosetta setup, and management
+# See: flake/systems.nix for nix-homebrew configuration
 
 # --- Nix Installation ---------------------------------------------------------
 install_nix() {
@@ -96,6 +79,12 @@ install_nix() {
 	# Restart shell environment to pick up Nix
 	info "Refreshing shell environment..."
 	export PATH="/nix/var/nix/profiles/default/bin:$PATH"
+
+	# Source Nix daemon for proper environment
+	if [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
+		# shellcheck source=/dev/null
+		source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+	fi
 
 	# Configure current user as trusted user
 	configure_trusted_user
@@ -556,7 +545,7 @@ main() {
 	echo
 
 	check_prereqs
-	install_homebrew
+	# Homebrew now managed by nix-homebrew during darwin-rebuild
 	install_nix
 	setup_config
 	post_install

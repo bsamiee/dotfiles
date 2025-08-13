@@ -363,8 +363,12 @@ cmd_exec() {
 		error "VM user '$vm_user' cannot be the same as host user! This would compromise isolation."
 	fi
 
+	# Always source Nix environment for bash -c to ensure commands work
+	# This handles both direct nix commands and complex shell pipelines
+	local wrapped_command="source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh 2>/dev/null || true; $command"
+
 	info "Executing in VM as '$vm_user': $command"
-	prlctl exec "$vm_name" --user "$vm_user" --resolve-paths "$command"
+	prlctl exec "$vm_name" --user "$vm_user" --resolve-paths "bash -c '$wrapped_command'"
 }
 
 cmd_connect() {
